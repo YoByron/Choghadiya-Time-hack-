@@ -1,0 +1,47 @@
+.rdp {
+    --rdp-cell-size: 40px;
+    --rdp-accent-color: #0000ff;
+    --rdp-background-color: #e7edff;
+    --rdp-accent-color-dark: #3003e1;
+    --rdp-background-color-dark: #180270;
+    --rdp-outline: 2px solid var(--rdp-accent-color);
+    --rdp-outline-selected: 3px solid var(--rdp-accent-color);
+    margin: 1em;
+  }
+  
+  .rdp-day_selected, 
+  .rdp-day_selected:focus-visible, 
+  .rdp-day_selected:hover {
+    color: white;
+    opacity: 1;
+    background-color: var(--rdp-accent-color);
+  }
+  
+  .dark .rdp-day_selected, 
+  .dark .rdp-day_selected:focus-visible, 
+  .dark .rdp-day_selected:hover {
+    background-color: var(--rdp-accent-color-dark);
+  }
+  
+  .rdp-day:hover:not(.rdp-day_selected) {
+    background-color: var(--rdp-background-color);
+  }
+  
+  .dark .rdp-day:hover:not(.rdp-day_selected) {
+    background-color: var(--rdp-background-color-dark);
+  }
+  
+  .dark .rdp {
+    --rdp-background-color: #1f2937;
+    --rdp-accent-color: #3b82f6;
+    color: white;
+  }
+  
+  .dark .rdp-day_today:not(.rdp-day_outside) {
+    font-weight: bold;
+    color: #3b82f6;
+  }
+  
+  .dark .rdp-button:hover:not([disabled]):not(.rdp-day_selected) {
+    background-color: #374151;
+  }
