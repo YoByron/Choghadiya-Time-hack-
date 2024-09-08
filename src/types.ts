@@ -2,10 +2,10 @@ export type ChoghadiyaName = 'Udveg' | 'Char' | 'Labh' | 'Amrit' | 'Kaal' | 'Shu
 
 export interface Period {
   name: ChoghadiyaName;
-  meaning: string;
-  effect: 'Good' | 'Bad' | 'Neutral';
-  works: string;
   start: Date;
   end: Date;
   isDay: boolean;
+  effect: 'Good' | 'Bad' | 'Neutral';
+  meaning: string;
+  works: string;
 }
