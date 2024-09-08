@@ -9,3 +9,14 @@ export interface Period {
   meaning: string;
   works: string;
 }
+
+export interface Activity {
+  name: string;
+  suitablePeriods: ChoghadiyaName[];
+}
+
+export interface VedicAstrologyData {
+  moonSign: string;
+  ascendant: string;
+  planetaryPositions: Record<string, string>;
+}

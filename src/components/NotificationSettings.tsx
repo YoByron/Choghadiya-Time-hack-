@@ -1,47 +1,59 @@
 import React from 'react';
 import { Switch } from '@/components/ui/switch';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-
-// Import these types from a shared types file or ChoghadiyaApp.tsx
-import { Period, ChoghadiyaName } from '../types';
+import { Slider } from '@/components/ui/slider';
+import { Button } from '@/components/ui/button';
+import { ChoghadiyaName } from '../types';
 
 interface NotificationSettingsProps {
-  periods: Period[];
   preferences: Record<ChoghadiyaName, boolean>;
   onToggle: (periodName: ChoghadiyaName) => void;
-  isOpen: boolean;
+  reminderTime: number;
+  setReminderTime: (time: number) => void;
+  onSave: () => void;
   onClose: () => void;
 }
 
 const NotificationSettings: React.FC<NotificationSettingsProps> = ({
-  periods,
   preferences,
   onToggle,
-  isOpen,
-  onClose
+  reminderTime,
+  setReminderTime,
+  onSave,
+  onClose,
 }) => {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Notification Settings</DialogTitle>
-        </DialogHeader>
-        <div className="mt-4 space-y-4">
-          {periods.map((period) => (
-            <div key={period.name} className="flex items-center justify-between">
-              <label htmlFor={`notify-${period.name}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Notify for {period.name}
-              </label>
-              <Switch
-                id={`notify-${period.name}`}
-                checked={preferences[period.name] || false}
-                onCheckedChange={() => onToggle(period.name)}
-              />
-            </div>
-          ))}
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold">Notification Preferences</h3>
+      {Object.entries(preferences).map(([periodName, isEnabled]) => (
+        <div key={periodName} className="flex items-center justify-between">
+          <span>{periodName}</span>
+          <Switch
+            id={`switch-${periodName}`}
+            checked={isEnabled}
+            onCheckedChange={() => onToggle(periodName as ChoghadiyaName)}
+          />
         </div>
-      </DialogContent>
-    </Dialog>
+      ))}
+      <div className="space-y-2">
+        <h4 className="text-md font-medium">Reminder Time</h4>
+        <Slider
+          value={[reminderTime]}
+          onValueChange={(value) => setReminderTime(value[0])}
+          min={1}
+          max={60}
+          step={1}
+        />
+        <p className="text-sm text-gray-500">
+          Remind me {reminderTime} minutes before a period starts
+        </p>
+      </div>
+      <div className="flex justify-end space-x-2">
+        <Button variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button onClick={onSave}>Save Changes</Button>
+      </div>
+    </div>
   );
 };
 

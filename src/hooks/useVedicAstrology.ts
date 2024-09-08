@@ -1,40 +1,40 @@
 import { useState, useEffect } from 'react';
 
 interface PlanetaryPosition {
-  planet: string;
+  name: string;
   sign: string;
-  degree: number;
 }
 
-interface VedicAstrologyData {
-  planetaryPositions: PlanetaryPosition[];
-  nakshatra: string;
+interface Nakshatras {
+  current: string;
+  moon: string;
 }
 
-export const useVedicAstrology = (): VedicAstrologyData => {
-  const [astroData, setAstroData] = useState<VedicAstrologyData>({
-    planetaryPositions: [],
-    nakshatra: '',
-  });
+export const useVedicAstrology = (date: Date) => {
+  const [planetaryPositions, setPlanetaryPositions] = useState<PlanetaryPosition[]>([]);
+  const [nakshatras, setNakshatras] = useState<Nakshatras>({ current: '', moon: '' });
+  const [yogas, setYogas] = useState<string[]>([]);
 
   useEffect(() => {
-    // In a real application, you would fetch this data from an API
-    // For now, we'll use mock data
-    const mockData: VedicAstrologyData = {
-      planetaryPositions: [
-        { planet: 'Sun', sign: 'Aries', degree: 15 },
-        { planet: 'Moon', sign: 'Taurus', degree: 22 },
-        { planet: 'Mars', sign: 'Gemini', degree: 8 },
-        { planet: 'Mercury', sign: 'Cancer', degree: 3 },
-        { planet: 'Jupiter', sign: 'Leo', degree: 17 },
-        { planet: 'Venus', sign: 'Virgo', degree: 29 },
-        { planet: 'Saturn', sign: 'Libra', degree: 11 },
-      ],
-      nakshatra: 'Rohini',
-    };
+    // In a real application, you would call an API or use a library to calculate these values
+    // For now, we'll use placeholder data
+    setPlanetaryPositions([
+      { name: 'Sun', sign: 'Aries' },
+      { name: 'Moon', sign: 'Taurus' },
+      { name: 'Mars', sign: 'Gemini' },
+      { name: 'Mercury', sign: 'Cancer' },
+      { name: 'Jupiter', sign: 'Leo' },
+      { name: 'Venus', sign: 'Virgo' },
+      { name: 'Saturn', sign: 'Libra' },
+    ]);
 
-    setAstroData(mockData);
-  }, []);
+    setNakshatras({
+      current: 'Rohini',
+      moon: 'Krittika',
+    });
 
-  return astroData;
+    setYogas(['Siddha Yoga', 'Amrita Yoga']);
+  }, [date]);
+
+  return { planetaryPositions, nakshatras, yogas };
 };

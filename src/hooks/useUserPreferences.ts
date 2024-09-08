@@ -1,23 +1,25 @@
 import { useState, useEffect } from 'react';
+import { Activity } from '../types';
 
 interface Preference {
-  // Define preference properties
+ favoriteActivity: string;
 }
 
-interface Activity {
-  // Define activity properties
-}
+// Remove the local Activity interface
 
 export const useUserPreferences = () => {
-  const [preferences, setPreferences] = useState<Preference[]>([]);
+  const [preferences, setPreferences] = useState<Preferences>({ favoriteActivity: '' });
   const [activities, setActivities] = useState<Activity[]>([]);
 
   useEffect(() => {
     // Fetch user preferences and activities from an API or local storage
     // For now, we'll use dummy data
-    setPreferences([{ /* dummy preference data */ }]);
-    setActivities([{ /* dummy activity data */ }]);
+    setPreferences({ favoriteActivity: 'Reading' });
+    setActivities([
+      { name: 'Reading', suitablePeriods: ['Shubh', 'Labh'] },
+      { name: 'Exercise', suitablePeriods: ['Char', 'Amrit'] },
+    ]);
   }, []);
 
-  return { preferences, activities };
+  return { userPreferences: { preferences, activities } };
 };

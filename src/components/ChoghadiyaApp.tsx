@@ -23,6 +23,10 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuGroup,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import DatePicker from 'react-datepicker';
@@ -38,13 +42,15 @@ import WeeklyChart from './WeeklyChart';
 import { calculateChoghadiyaPeriods, useChoghadiyaLogic } from '../utils/choghadiyaUtils';
 import { Period } from '../types';
 import '../styles/calendar.css';
-//import TaskPlanner from './TaskPlanner';
+import HistoricalData from './HistoricalData';
+import NotificationManager from './NotificationManager';
+import PersonalizedRecommendations from './PersonalizedRecommendations';
+import VedicAstrologyInsights from './VedicAstrologyInsights';
+import TaskPlanner from './TaskPlanner';
+import CommunityForum from './CommunityForum';
 
-// Lazy-loaded components
-const TaskPlanner = lazy(() => import('./TaskPlanner'));
-const PersonalizedRecommendations = lazy(() => import('./PersonalizedRecommendations'));
+//const TaskPlanner = lazy(() => import('./TaskPlanner'));
 const ReminderSystem = lazy(() => import('./ReminderSystem'));
-const CommunityForum = lazy(() => import('./CommunityForum'));
 const AlertCustomizer = lazy(() => import('./AlertCustomizer'));
 const VoiceCommands = lazy(() => import('./VoiceCommands'));
 const Gamification = lazy(() => import('./Gamification'));
@@ -90,6 +96,8 @@ const ChoghadiyaApp = () => {
   const [showOnboarding, setShowOnboarding] = useState(true);
   const { toast } = useToast();
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
+  const [reminderTime, setReminderTime] = useState(15); // Default to 15 minutes
+  const [userPreferences, setUserPreferences] = useState<string[]>([]);
 
   const {
     sunrise,
@@ -192,10 +200,6 @@ const ChoghadiyaApp = () => {
     setCurrentDate(clickedDate);
   };
 
-  const openNotificationSettings = () => {
-    setActiveFeature('Notification Settings');
-  };
-
   const handlePeriodClick = (period: Period) => {
     setSelectedPeriod(period);
     setIsModalOpen(true);
@@ -263,6 +267,34 @@ const ChoghadiyaApp = () => {
     setLocation({ lat, lon });
   };
 
+  const handleSaveNotificationSettings = () => {
+    // Save notification settings to local storage or backend
+    localStorage.setItem('notificationPreferences', JSON.stringify(notificationPreferences));
+    localStorage.setItem('reminderTime', reminderTime.toString());
+    closeFeature();
+  };
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date();
+      const nextPeriod = periods.find(p => p.start > now);
+      if (nextPeriod && (nextPeriod.start.getTime() - now.getTime()) <= 60000) { // 1 minute before next period
+        toast({
+          title: "Period Changing Soon",
+          description: `${nextPeriod.name} period will start in 1 minute.`,
+        });
+      }
+    }, 30000); // Check every 30 seconds
+
+    return () => clearInterval(timer);
+  }, [periods]);
+
+  useEffect(() => {
+    console.log('Current Date:', currentDate);
+    console.log('Current Period:', currentPeriod);
+    console.log('Periods:', periods);
+  }, [currentDate, currentPeriod, periods]);
+
   return (
     <div className={`${isDarkMode ? 'dark' : ''} min-h-screen bg-gray-100 dark:bg-gray-900 font-sans transition-colors duration-300`} style={themeStyle}>
       <div className="container mx-auto px-4 py-8">
@@ -273,11 +305,60 @@ const ChoghadiyaApp = () => {
             currentDate={currentDate}
             toggleDarkMode={toggleDarkMode}
             isDarkMode={isDarkMode}
-            openNotificationSettings={openNotificationSettings}
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
             setLocation={handleSetLocation}
-          />
+          >
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>Features</DropdownMenuLabel>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onSelect={() => openFeature('Theme Customizer')}>
+                    Theme Customizer
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => openFeature('Gamification')}>
+                    Gamification
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => openFeature('Alert Customizer')}>
+                    Alert Customizer
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => openFeature('Task Planner')}>
+                    Task Planner
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => openFeature('Meditation Timer')}>
+                    Meditation Timer
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => openFeature('Vedic Astrology Insights')}>
+                    Vedic Astrology Insights
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => openFeature('Reminder System')}>
+                    Reminder System
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => openFeature('Personalized Recommendations')}>
+                    Personalized Recommendations
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => openFeature('Community Forum')}>
+                    Community Forum
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onSelect={() => openFeature('Help')}>
+                    Help
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => openFeature('About')}>
+                    About Choghadiya
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </Header>
           <CardContent className="p-6 bg-gray-50 dark:bg-gray-800">
             {showOnboarding && (
               <motion.div
@@ -291,7 +372,17 @@ const ChoghadiyaApp = () => {
                 <Button onClick={() => setShowOnboarding(false)} className="mt-2">Got it!</Button>
               </motion.div>
             )}
-            <CurrentPeriodDisplay currentPeriod={currentPeriod} remainingTime={remainingTime} />
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentPeriod?.name}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+              >
+                <CurrentPeriodDisplay currentPeriod={currentPeriod} remainingTime={formatRemainingTime(remainingTime)} />
+              </motion.div>
+            </AnimatePresence>
             <div className="flex items-center justify-between mb-4">
               <Button onClick={() => navigateDate('prev')} variant="ghost" size="icon">
                 <ChevronLeft className="h-6 w-6" />
@@ -341,13 +432,21 @@ const ChoghadiyaApp = () => {
               </Button>
             </div>
             <WeeklyChart data={weeklyData} />
+            <HistoricalData periods={periods} />
+            <VedicAstrologyInsights currentPeriod={currentPeriod} currentDate={currentDate} />
           </CardContent>
         </Card>
       </div>
-      <ChoghadiyaCircle periods={periods} currentPeriod={currentPeriod} />
+      <ChoghadiyaCircle periods={periods} currentPeriod={currentPeriod} onPeriodClick={handlePeriodClick} />
+      <NotificationManager
+        currentPeriod={currentPeriod}
+        nextPeriod={periods[periods.findIndex(p => p === currentPeriod) + 1] || null}
+        preferences={notificationPreferences}
+        reminderTime={reminderTime}
+      />
       <AnimatePresence>
         {activeFeature && (
-          <Dialog open={!!activeFeature} onOpenChange={closeFeature}>
+          <Dialog open={!!activeFeature} onOpenChange={() => setActiveFeature(null)}>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>{activeFeature}</DialogTitle>
@@ -359,15 +458,6 @@ const ChoghadiyaApp = () => {
                 transition={{ duration: 0.3 }}
               >
                 <Suspense fallback={<div>Loading...</div>}>
-                  {activeFeature === 'Notification Settings' && (
-                    <NotificationSettings 
-                      periods={periods}
-                      preferences={notificationPreferences}
-                      onToggle={toggleNotification}
-                      isOpen={true}
-                      onClose={closeFeature}
-                    />
-                  )}
                   {activeFeature === 'Theme Customizer' && (
                     <ThemeCustomizer 
                       customColors={customColors}
@@ -378,23 +468,55 @@ const ChoghadiyaApp = () => {
                       setFontFamily={setFontFamily}
                       setLayout={setLayout}
                       setBorderRadius={setBorderRadius}
-                      onClose={closeFeature}
+                      onClose={() => setActiveFeature(null)}
                     />
                   )}
-                  {activeFeature === 'Voice Commands' && <VoiceCommands onClose={closeFeature} />}
-                  {activeFeature === 'Gamification' && <Gamification onClose={closeFeature} />}
-                  {activeFeature === 'Alert Customizer' && <AlertCustomizer onClose={closeFeature} />}
+                  {activeFeature === 'Gamification' && (
+                    <Gamification onClose={() => setActiveFeature(null)} />
+                  )}
+                  {activeFeature === 'Alert Customizer' && (
+                    <AlertCustomizer onClose={() => setActiveFeature(null)} />
+                  )}
                   {activeFeature === 'Task Planner' && (
                     <TaskPlanner
                       periods={periods}
-                      onClose={closeFeature}
+                      onClose={() => setActiveFeature(null)}
                       onTaskComplete={handleTaskCompletion}
                     />
                   )}
-                  {activeFeature === 'Meditation Timer' && <MeditationTimer onClose={closeFeature} />}
-                  {activeFeature === 'Personalized Recommendations' && <PersonalizedRecommendations onClose={closeFeature} />}
-                  {activeFeature === 'Reminder System' && <ReminderSystem onClose={closeFeature} />}
-                  {activeFeature === 'Community Forum' && <CommunityForum onClose={closeFeature} />}
+                  {activeFeature === 'Meditation Timer' && (
+                    <MeditationTimer onClose={() => setActiveFeature(null)} />
+                  )}
+                  {activeFeature === 'Vedic Astrology Insights' && (
+                    <VedicAstrologyInsights currentPeriod={currentPeriod} currentDate={currentDate} />
+                  )}
+                  {activeFeature === 'Reminder System' && (
+                    <ReminderSystem />
+                  )}
+                  {activeFeature === 'Personalized Recommendations' && (
+                    <PersonalizedRecommendations
+                      currentPeriod={currentPeriod}
+                      currentDate={currentDate}
+                      userPreferences={userPreferences}
+                    />
+                  )}
+                  {activeFeature === 'Community Forum' && (
+                    <CommunityForum />
+                  )}
+                  {activeFeature === 'Help' && (
+                    <div>
+                      <h2>Help</h2>
+                      <p>This is the help section for the Choghadiya App.</p>
+                      {/* Add more help content here */}
+                    </div>
+                  )}
+                  {activeFeature === 'About' && (
+                    <div>
+                      <h2>About Choghadiya</h2>
+                      <p>Choghadiya is an ancient Vedic time division system used for determining auspicious times for various activities.</p>
+                      {/* Add more information about Choghadiya here */}
+                    </div>
+                  )}
                 </Suspense>
               </motion.div>
             </DialogContent>

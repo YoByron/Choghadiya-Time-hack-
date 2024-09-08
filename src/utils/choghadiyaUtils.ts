@@ -98,6 +98,21 @@ export const useChoghadiyaLogic = (currentDate: Date) => {
     }
   }, [currentDate]);
 
+  useEffect(() => {
+    const updateCurrentPeriod = () => {
+      const now = new Date();
+      const currentPeriod = periods.find(period => 
+        now >= period.start && now < period.end
+      ) || null;
+      setCurrentPeriod(currentPeriod);
+    };
+
+    updateCurrentPeriod();
+    const intervalId = setInterval(updateCurrentPeriod, 60000); // Update every minute
+
+    return () => clearInterval(intervalId);
+  }, [periods]);
+
   return {
     sunrise,
     setSunrise,
