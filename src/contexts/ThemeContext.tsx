@@ -1,56 +1,36 @@
 'use client';
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, ReactNode } from 'react';
+
+export interface CustomColors {
+  Good: string;
+  Bad: string;
+  Neutral: string;
+}
 
 interface ThemeContextType {
   isDarkMode: boolean;
   toggleDarkMode: () => void;
-  customColors: Record<string, string>;
-  setCustomColors: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  customColors: CustomColors;
+  setCustomColors: React.Dispatch<React.SetStateAction<CustomColors>>;
   fontSize: number;
-  setFontSize: (size: number) => void;
+  setFontSize: React.Dispatch<React.SetStateAction<number>>;
   fontFamily: string;
-  setFontFamily: (family: string) => void;
-  layout: string;
-  setLayout: (layout: string) => void;
-  borderRadius: number;
-  setBorderRadius: (radius: number) => void;
+  setFontFamily: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [customColors, setCustomColors] = useState({
+  const [customColors, setCustomColors] = useState<CustomColors>({
     Good: '#4CAF50',
     Bad: '#F44336',
-    Neutral: '#9E9E9E',
+    Neutral: '#9E9E9E'
   });
   const [fontSize, setFontSize] = useState(16);
-  const [fontFamily, setFontFamily] = useState('Sans-serif');
-  const [layout, setLayout] = useState('Default');
-  const [borderRadius, setBorderRadius] = useState(4);
+  const [fontFamily, setFontFamily] = useState('Arial');
 
-  const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
-
-  // Load theme from localStorage on initial render
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      const parsedTheme = JSON.parse(savedTheme);
-      setIsDarkMode(parsedTheme.isDarkMode);
-      setCustomColors(parsedTheme.customColors);
-      setFontSize(parsedTheme.fontSize);
-      setFontFamily(parsedTheme.fontFamily);
-      setLayout(parsedTheme.layout);
-      setBorderRadius(parsedTheme.borderRadius);
-    }
-  }, []);
-
-  // Save theme to localStorage whenever it changes
-  useEffect(() => {
-    const theme = { isDarkMode, customColors, fontSize, fontFamily, layout, borderRadius };
-    localStorage.setItem('theme', JSON.stringify(theme));
-  }, [isDarkMode, customColors, fontSize, fontFamily, layout, borderRadius]);
+  const toggleDarkMode = () => setIsDarkMode(prev => !prev);
 
   return (
     <ThemeContext.Provider value={{
@@ -61,11 +41,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       fontSize,
       setFontSize,
       fontFamily,
-      setFontFamily,
-      layout,
-      setLayout,
-      borderRadius,
-      setBorderRadius
+      setFontFamily
     }}>
       {children}
     </ThemeContext.Provider>

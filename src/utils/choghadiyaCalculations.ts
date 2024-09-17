@@ -4,7 +4,7 @@ export type ChoghadiyaPeriod = 'Udveg' | 'Char' | 'Labh' | 'Amrit' | 'Kaal' | 'S
 export type Period = {
   name: ChoghadiyaPeriod;
   meaning: string;
-  effect: 'Good' | 'Bad';
+  effect: 'Good' | 'Bad' | 'Neutral';
   works: string;
   start: Date;
   end: Date;
@@ -42,43 +42,65 @@ export const CHOGHADIYA_MEANINGS: Record<ChoghadiyaPeriod, { meaning: string; ef
   Rog: { meaning: 'Disease', effect: 'Bad', works: 'Rest and recuperation' }
 };
 
-export const calculateChoghadiyaPeriods = (sunrise: Date, sunset: Date, currentDate: Date): Period[] => {
+export function calculateChoghadiyaPeriods(
+  date: Date,
+  sunrise: Date,
+  sunset: Date
+): Period[] {
+  const dayOfWeek = getDayOfWeek(date);
+  const dayChoghadiya = DAY_CHOGHADIYA[dayOfWeek];
+  const nightChoghadiya = NIGHT_CHOGHADIYA[dayOfWeek];
+
   const periods: Period[] = [];
-  const dayDuration = (sunset.getTime() - sunrise.getTime()) / 8;
-  const nightDuration = (24 * 60 * 60 * 1000 - (sunset.getTime() - sunrise.getTime())) / 8;
-  
-  const dayOfWeek = sunrise.getDay();
-  const dayChoghadiya = getDayChoghadiya(dayOfWeek);
-  const nightChoghadiya = getNightChoghadiya(dayOfWeek);
 
   // Calculate day periods
+  const dayDuration = (sunset.getTime() - sunrise.getTime()) / 8;
   for (let i = 0; i < 8; i++) {
     const start = new Date(sunrise.getTime() + i * dayDuration);
     const end = new Date(start.getTime() + dayDuration);
+    const name = dayChoghadiya[i];
     periods.push({
-      name: dayChoghadiya[i] as ChoghadiyaPeriod,
+      name,
+      meaning: CHOGHADIYA_MEANINGS[name].meaning,
       start,
       end,
       isDay: true,
-      ...CHOGHADIYA_MEANINGS[dayChoghadiya[i] as ChoghadiyaPeriod]
+      effect: getEffectForChoghadiya(name),
+      works: getWorksForChoghadiya(name)
     });
   }
 
   // Calculate night periods
+  const nightDuration = (
+    sunrise.getTime() +
+    24 * 60 * 60 * 1000 -
+    sunset.getTime()
+  ) / 8;
   for (let i = 0; i < 8; i++) {
     const start = new Date(sunset.getTime() + i * nightDuration);
     const end = new Date(start.getTime() + nightDuration);
+    const name = nightChoghadiya[i];
     periods.push({
-      name: nightChoghadiya[i],
+      name,
+      meaning: CHOGHADIYA_MEANINGS[name].meaning,
       start,
       end,
       isDay: false,
-      ...CHOGHADIYA_MEANINGS[nightChoghadiya[i] as ChoghadiyaPeriod]
+      effect: getEffectForChoghadiya(name),
+      works: getWorksForChoghadiya(name)
     });
   }
 
   return periods;
-};
+}
+
+function getEffectForChoghadiya(choghadiya: ChoghadiyaPeriod): 'Good' | 'Bad' | 'Neutral' {
+  return CHOGHADIYA_MEANINGS[choghadiya].effect;
+}
+
+function getWorksForChoghadiya(choghadiya: ChoghadiyaPeriod): string {
+  return CHOGHADIYA_MEANINGS[choghadiya].works;
+}
 
 const getDayChoghadiya = (dayOfWeek: number): string[] => {
   const dayChoghadiya = [
@@ -105,3 +127,8 @@ const getNightChoghadiya = (dayOfWeek: number): string[] => {
   ];
   return nightChoghadiya[dayOfWeek];
 };
+
+function getDayOfWeek(date: Date): DayOfWeek {
+  const days: DayOfWeek[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  return days[date.getDay()];
+}

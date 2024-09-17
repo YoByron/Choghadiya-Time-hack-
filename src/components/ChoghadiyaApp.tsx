@@ -48,6 +48,7 @@ import PersonalizedRecommendations from './PersonalizedRecommendations';
 import VedicAstrologyInsights from './VedicAstrologyInsights';
 import TaskPlanner from './TaskPlanner';
 import CommunityForum from './CommunityForum';
+import { CustomColors } from '../contexts/ThemeContext';
 
 //const TaskPlanner = lazy(() => import('./TaskPlanner'));
 const ReminderSystem = lazy(() => import('./ReminderSystem'));
@@ -90,7 +91,7 @@ const CHOGHADIYA_MEANINGS: Record<ChoghadiyaName, { meaning: string; effect: 'Go
 };
 
 const ChoghadiyaApp = () => {
-  const { isDarkMode, toggleDarkMode, customColors, setCustomColors, fontSize, setFontSize, fontFamily, setFontFamily, layout, setLayout, borderRadius, setBorderRadius } = useTheme();
+  const { isDarkMode, toggleDarkMode, customColors, setCustomColors, fontSize, setFontSize, fontFamily, setFontFamily } = useTheme();
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [activeFeature, setActiveFeature] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(true);
@@ -190,7 +191,6 @@ const ChoghadiyaApp = () => {
   const themeStyle = {
     fontSize: `${fontSize}px`,
     fontFamily: fontFamily,
-    '--border-radius': `${borderRadius}px`,
   } as React.CSSProperties;
 
   const handleWeekdayClick = (dayIndex: number) => {
@@ -466,8 +466,6 @@ const ChoghadiyaApp = () => {
                       toggleDarkMode={toggleDarkMode}
                       setFontSize={setFontSize}
                       setFontFamily={setFontFamily}
-                      setLayout={setLayout}
-                      setBorderRadius={setBorderRadius}
                       onClose={() => setActiveFeature(null)}
                     />
                   )}

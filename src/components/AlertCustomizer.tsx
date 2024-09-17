@@ -107,7 +107,7 @@ const AlertCustomizer: React.FC<AlertCustomizerProps> = ({ onClose }) => {
           <Switch
             id="sound-enabled"
             checked={soundEnabled}
-            onCheckedChange={(checked: boolean) => setSoundEnabled(checked) as any}
+            onCheckedChange={() => setSoundEnabled(!soundEnabled)}
           />
         </div>
 
@@ -151,7 +151,7 @@ const AlertCustomizer: React.FC<AlertCustomizerProps> = ({ onClose }) => {
           <Switch
             id="vibration-enabled"
             checked={vibrationEnabled}
-            onCheckedChange={(checked) => setVibrationEnabled(checked)}
+            onCheckedChange={() => setVibrationEnabled(!vibrationEnabled)}
           />
         </div>
 

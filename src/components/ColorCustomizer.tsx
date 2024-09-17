@@ -1,24 +1,28 @@
 import React from 'react';
-import { useTheme } from '../contexts/ThemeContext';
+import { CustomColors } from '../contexts/ThemeContext';
 
-const CHOGHADIYA_PERIODS = ['Udveg', 'Char', 'Labh', 'Amrit', 'Kaal', 'Shubh', 'Rog'];
+interface ColorCustomizerProps {
+  customColors: CustomColors;
+  setCustomColors: React.Dispatch<React.SetStateAction<CustomColors>>;
+}
 
-const ColorCustomizer: React.FC = () => {
-  const { customColors, setCustomColors } = useTheme();
-
-  const handleColorChange = (periodName: string, color: string) => {
-    setCustomColors(prev => ({ ...prev, [periodName]: color }));
+const ColorCustomizer: React.FC<ColorCustomizerProps> = ({ customColors, setCustomColors }) => {
+  const handleColorChange = (periodName: keyof CustomColors, color: string) => {
+    setCustomColors(prevColors => ({
+      ...prevColors,
+      [periodName]: color
+    }));
   };
 
   return (
-    <div className="color-customizer">
-      {CHOGHADIYA_PERIODS.map((periodName) => (
-        <div key={periodName} className="color-picker">
+    <div className="grid grid-cols-3 gap-4">
+      {(Object.keys(customColors) as Array<keyof CustomColors>).map((periodName) => (
+        <div key={periodName}>
           <label htmlFor={`color-${periodName}`}>{periodName}</label>
           <input
             type="color"
             id={`color-${periodName}`}
-            value={customColors[periodName] || '#ffffff'}
+            value={customColors[periodName]}
             onChange={(e) => handleColorChange(periodName, e.target.value)}
           />
         </div>

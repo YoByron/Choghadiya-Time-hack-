@@ -1,16 +1,17 @@
 'use client';
 import React, { useState, useCallback } from 'react';
 import { Sun, Moon, Calendar, BarChart2, Clock, BookOpen, Settings, Menu } from 'lucide-react';
-import WeekView from './WeekView';
 import MeditationTimer from './MeditationTimer';
 import HistoricalData from './HistoricalData';
 import { useTheme } from '../contexts/ThemeContext';
 import { useChoghadiya } from '../hooks/useChoghadiya';
+import WeekView from './WeekView';
+
 
 type ViewType = 'daily' | 'weekly' | 'meditation' | 'historical' | 'settings';
 
 const ChoghadiyaApp = () => {
-  const { isDarkMode, setIsDarkMode } = useTheme();
+  const { isDarkMode, toggleDarkMode } = useTheme(); // Changed this line
   const { currentDate } = useChoghadiya();
   const [activeView, setActiveView] = useState<ViewType>('daily');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -31,11 +32,11 @@ const ChoghadiyaApp = () => {
   const renderView = () => {
     switch (activeView) {
       case 'weekly':
-        return <WeekView initialDate={currentDate} />;
+        return <WeekView />;
       case 'meditation':
-        return <MeditationTimer />;
+        return <MeditationTimer onClose={() => setActiveView('daily')} />;
       case 'historical':
-        return <HistoricalData />;
+        return <HistoricalData periods={[]} />; // You need to provide the correct periods data here
       case 'settings':
         return <div>Settings View</div>;
       case 'daily':
@@ -70,7 +71,7 @@ const ChoghadiyaApp = () => {
             ))}
           </nav>
           <button
-            onClick={() => setIsDarkMode(!isDarkMode)}
+            onClick={toggleDarkMode} // Changed this line
             className="p-2 rounded-full bg-white bg-opacity-20 hover:bg-opacity-30 transition-colors duration-200"
           >
             {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}

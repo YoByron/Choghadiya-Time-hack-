@@ -8,20 +8,19 @@ import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Paintbrush, Type, Layout, Save, Undo, Palette } from 'lucide-react';
 
+import { CustomColors } from '../contexts/ThemeContext';
+
 interface ThemeCustomizerProps {
-  customColors: Record<string, string>;
-  setCustomColors: (colors: Record<string, string>) => void;
+  customColors: CustomColors;
+  setCustomColors: React.Dispatch<React.SetStateAction<CustomColors>>;
   isDarkMode: boolean;
   toggleDarkMode: () => void;
-  setFontSize: (size: number) => void;
-  setFontFamily: (family: string) => void;
-  setLayout: (layout: string) => void;
-  setBorderRadius: (radius: number) => void;
+  setFontSize: React.Dispatch<React.SetStateAction<number>>;
+  setFontFamily: React.Dispatch<React.SetStateAction<string>>;
   onClose: () => void;
 }
 
 const fontOptions = ['Sans-serif', 'Serif', 'Monospace', 'Cursive', 'Fantasy'];
-const layoutOptions = ['Default', 'Compact', 'Expanded', 'Grid'];
 
 const presetThemes = {
   Classic: {
@@ -56,43 +55,31 @@ const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
   setCustomColors,
   isDarkMode,
   toggleDarkMode,
-  setFontSize: setGlobalFontSize,
-  setFontFamily: setGlobalFontFamily,
-  setLayout: setGlobalLayout,
-  setBorderRadius: setGlobalBorderRadius,
+  setFontSize,
+  setFontFamily,
   onClose,
 }) => {
   const [colors, setColors] = useState(customColors);
-  const [fontSize, setFontSize] = useState(16);
-  const [fontFamily, setFontFamily] = useState('Sans-serif');
-  const [layout, setLayout] = useState('Default');
-  const [borderRadius, setBorderRadius] = useState(4);
+  const [fontSize, setLocalFontSize] = useState(16);
+  const [fontFamily, setLocalFontFamily] = useState('Sans-serif');
 
-  const handleColorChange = (effect: string, color: string) => {
+  const handleColorChange = (effect: keyof CustomColors, color: string) => {
     setColors((prevColors) => ({ ...prevColors, [effect]: color }));
   };
 
   const handleSave = () => {
     setCustomColors(colors);
-    setGlobalFontSize(fontSize);
-    setGlobalFontFamily(fontFamily);
-    setGlobalLayout(layout);
-    setGlobalBorderRadius(borderRadius);
+    setFontSize(fontSize);
+    setFontFamily(fontFamily);
     onClose();
   };
 
   const handleReset = () => {
     setColors(presetThemes.Classic);
-    setFontSize(16);
-    setFontFamily('Sans-serif');
-    setLayout('Default');
-    toggleDarkMode(); // Changed from setDarkMode(false)
-    setBorderRadius(4);
+    setLocalFontSize(16);
+    setLocalFontFamily('Sans-serif');
+    toggleDarkMode();
   };
-
-  const handleDarkModeChange = useCallback(() => {
-    toggleDarkMode(); // Changed from setDarkMode(checked)
-  }, [toggleDarkMode]);
 
   const applyPresetTheme = (themeName: keyof typeof presetThemes) => {
     setColors(presetThemes[themeName]);
@@ -140,7 +127,7 @@ const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                   id={`color-${effect}`}
                   type="color"
                   value={color}
-                  onChange={(e) => handleColorChange(effect, e.target.value)}
+                  onChange={(e) => handleColorChange(effect as keyof CustomColors, e.target.value)}
                   className="w-full h-10 cursor-pointer"
                 />
               </div>
@@ -162,12 +149,12 @@ const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
                 max={24}
                 step={1}
                 value={[fontSize]}
-                onValueChange={(value) => setFontSize(value[0])}
+                onValueChange={(value) => setLocalFontSize(value[0])}
               />
             </div>
             <div>
               <Label htmlFor="font-family">Font Family</Label>
-              <Select value={fontFamily} onValueChange={setFontFamily}>
+              <Select value={fontFamily} onValueChange={setLocalFontFamily}>
                 <SelectTrigger id="font-family">
                   <SelectValue placeholder="Select a font family" />
                 </SelectTrigger>
@@ -183,43 +170,12 @@ const ThemeCustomizer: React.FC<ThemeCustomizerProps> = ({
           </div>
         </div>
 
-        <div>
-          <h3 className="text-lg font-semibold mb-2 flex items-center">
-            <Layout className="w-5 h-5 mr-2" />
-            Layout
-          </h3>
-          <Select value={layout} onValueChange={setLayout}>
-            <SelectTrigger id="layout">
-              <SelectValue placeholder="Select a layout" />
-            </SelectTrigger>
-            <SelectContent>
-              {layoutOptions.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
         <div className="flex items-center justify-between">
           <Label htmlFor="dark-mode">Dark Mode</Label>
           <Switch
             id="dark-mode"
             checked={isDarkMode}
             onCheckedChange={toggleDarkMode}
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="border-radius">Border Radius: {borderRadius}px</Label>
-          <Slider
-            id="border-radius"
-            min={0}
-            max={20}
-            step={1}
-            value={[borderRadius]}
-            onValueChange={(value) => setBorderRadius(value[0])}
           />
         </div>
       </div>
